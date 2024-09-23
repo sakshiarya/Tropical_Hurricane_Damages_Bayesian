@@ -1,6 +1,6 @@
 #################################################################
 #################################################################
-#Title: Posterior Predictives using each MCMC iteration once for 2016 
+#Title: Posterior Predictives using each MCMC iteration once for 2022 
 #      based on 1960-2015 as in Method 3
 #Author: Sakshi Arya (aryax010@umn.edu)
 #Objective: Create models and run MCMC
@@ -27,35 +27,36 @@ library(coda)
 library(pscl)
 
 #Run all data creation and hyperparameter code
-filep<-'/Users/sakshi/Documents/School/Research/Lindsey_Dissertation2021/Chapter 2 - Bayesian Damage/Posterior Prediction/Predicting 2016/'
+filep<-'/Volumes/GoogleDrive-116944872060578867313/My\ Drive/Research/2022/Ansu/BayesStorm/Tropical_Hurricane_Damages_Bayesian/2024\ Redo\ Seasonal/Posterior\ Prediction/2022/MCMC'
+filefigs <- '/Volumes/GoogleDrive-116944872060578867313/My\ Drive/Research/2022/Ansu/BayesStorm/Tropical_Hurricane_Damages_Bayesian/2024\ Redo\ Seasonal/Posterior\ Prediction/2022/Figs'
 #source(paste(filep,'0_Data_Processing.r',sep=''))
 #source(paste(filep,'1a_Hyperpar_Beta_2010.r',sep=''))
 #source(paste(filep,'1b_Hyperpar_Theta_2010.r',sep=''))
 #source(paste(filep,'1c_Hyperpar_Mu_Sigma_2010.r',sep=''))
 #source(paste(filep,'2_Models_2010.r',sep=''))
 
-filedata<-'/Users/sakshi/Documents/School/Research/Lindsey_Dissertation2021/Chapter 2 - Bayesian Damage/Data Sets/'
-
 #Annualized data
-Annual_Data<- read.csv(file.path(filedata,'Derived Data Sets 2021/Categorized_Annual_1960_2019.csv'))
-testsettruth<-Annual_Data[Annual_Data$Year>=2016,]
+Annual_Data<- read.csv(file.path(filedata,'Categorized_Annual_1960_2022.csv'))
+testsettruth<-Annual_Data[Annual_Data$Year>=2021,]
 
 #Annualized Covariates (May/June Averages)
-Annual_Cov1 <- read.csv(file.path(filedata,'Derived Data Sets 2021/Annual_Covariates_1960_2019.csv'))
-Annual_Cov <- Annual_Cov1[Annual_Cov1$Year>=2016,]
+Annual_Cov <- read.csv(file.path(filedata,'Annual_Covariates_1960_2022.csv'))
+Annual_Cov <- Annual_Cov[Annual_Cov$Year>=2021,]
 
-#Observed covariate data for 2016
-testset<- as.numeric(Annual_Cov[Annual_Cov$Year == 2016,4:9])
+#Observed Data from 2011 forward
+testset<- as.numeric(Annual_Cov[Annual_Cov$Year == 2022,4:9])
 
-#Loading in the MCMC Chains
-load(paste(filep,'MCMC Chains/clones.MCMC.final.FB.all.2015.rda',sep=''))
-load(paste(filep,'MCMC Chains/jags.MCMC.final.FB.all.2015.rda',sep=''))
+##Loading in the MCMC Chains
+load(file.path(filep,'clones.MCMC.final.FB.all.2021.rda'))
+load(file.path(filep,'jags.MCMC.final.FB.all.2021.rda'))
 
-jags.2015.posterior <- as.mcmc(x= jags.MCMC.final.FB.all.2015)
+jags.2021.posterior <- as.mcmc(x= jags.MCMC.final.FB.all.2021)
 
 #Saving the hierarchical estimates (means of the posterior)
-pars2dclone<-summary(clones.MCMC.final.FB.all.2015)[[1]][,1]
-pars2jags<-summary(jags.2015.posterior)$statistics[c(1:12,14:20),1]
+pars2dclone<-summary(clones.MCMC.final.FB.all.2021)[[1]][,1]
+pars2jags<-summary(jags.2021.posterior)$statistics[c(1:14,16:20),1]
+
+
 
 #Assigning parameters for Group 1 (TS-2)
 parameters_group1dclone<-c(pars2dclone['Beta1[1]'],pars2dclone['Beta1[2]'],pars2dclone['Beta1[3]'],pars2dclone['Beta1[4]'],pars2dclone['Beta1[5]'],pars2dclone['Beta1[6]'], pars2dclone['r'], pars2dclone['Theta1'], pars2dclone['log_mu1'], pars2dclone['log_sigma21'])
@@ -66,8 +67,8 @@ parameters_group2dclone <-c(pars2dclone['Beta2[1]'], pars2dclone['Beta2[2]'],par
 parameters_group2jags <-c(pars2jags['Beta2[1]'], pars2jags['Beta2[2]'],pars2jags['Beta2[3]'],pars2jags['Beta2[4]'],pars2jags['Beta2[5]'],pars2jags['Beta2[6]'], pars2jags['Theta2'], pars2jags['log_mu2'], pars2jags['log_sigma22'])
 
 
-posterior.sample.size<-dim(jags.MCMC.final.FB.all.2015$BUGSoutput$sims.list$Beta1)[1]
-posterior.sample<-jags.MCMC.final.FB.all.2015$BUGSoutput$sims.list
+posterior.sample.size<-dim(jags.MCMC.final.FB.all.2021$BUGSoutput$sims.list$Beta1)[1]
+posterior.sample<-jags.MCMC.final.FB.all.2021$BUGSoutput$sims.list
 #################################################################
 #################################################################
 #Category TS-2
@@ -94,41 +95,41 @@ for(i in 1:posterior.sample.size){
 }
 
 
-#2016 Simulated Frequency for TS-2 with observed value
-#pdf("Pred2016_Frequency_TS2_methodc.pdf")
+#2022 Simulated Frequency for TS-2 with observed value
+pdf(file.path(filefigs,"Pred2022_Frequency_TS2_methodc.pdf"))
 par(mar=c(4,4,0,0)+0.1,mgp=c(2.5, 0.8, 0))#sets margins of plotting area
-plot(table(N1)/sum(table(N1)), type = "h",ylab='Density',main='',xlab='TS-2 Storm Frequency',xlim=c(0,60),axes=F, cex.lab = 1.25)
+plot(table(N1)/sum(table(N1)), type = "h",ylab='Density',main='',xlab='1-2 Storm Frequency',xlim=c(0,60), ylim = c(0,0.1),axes=F, cex.lab = 1.25)
 axis(side=2, pos = -2.5, cex.axis = 1.25)
 axis(side=1,at=seq(0,60,10), cex.axis = 1.25, pos=-0.004)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Freq +0.2,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Freq +0.2,y1= 0.08,col='red',lwd=3,lty=2)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Freq-0.2,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Freq -0.2,y1= 0.08,col='red',lwd=3,lty=2)
-#dev.off()
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Freq +0.2,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Freq +0.2,y1= 0.091,col='red',lwd=3,lty=2)
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Freq-0.2,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Freq -0.2,y1= 0.091,col='red',lwd=3,lty=2)
+dev.off()
 
-#2016 Simulated Landfall for TS-2 with observed value
-#pdf("Pred2016_Landfall_TS2_methodc.pdf")
+#2022 Simulated Landfall for TS-2 with observed value
+pdf(file.path(filefigs,"Pred2022_Landfall_TS2_methodc.pdf"))
 par(mar=c(4,4,0,0)+0.1,mgp=c(2.5, 0.8, 0))#sets margins of plotting area
-plot(table(L1)/sum(table(L1)), ylim = c(0,0.35), type = "h",ylab='Density',xlab='TS-2 Landfall Frequency',main='',xlim=c(0,15),axes=F, cex.lab =1.25)
+plot(table(L1)/sum(table(L1)), ylim = c(0,0.35), type = "h",ylab='Density',xlab='1-2 Landfall Frequency',main='',xlim=c(0,15),axes=F, cex.lab =1.25)
 axis(side=2,pos = -0.6, cex.axis = 1.25)
 axis(side=1,at=seq(0,15,5),cex.axis = 1.25, pos=-0.015)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall +0.1,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall +0.1,y1= 0.33,col='red',lwd=3,lty=2)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall -0.1,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall -0.1,y1= 0.33,col='red',lwd=3,lty=2)
-#dev.off()
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall +0.1,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall +0.1,y1= 0.301,col='red',lwd=3,lty=2)
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall -0.1,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$Landfall -0.1,y1= 0.301,col='red',lwd=3,lty=2)
+dev.off()
 
-#2016 Simulated Damages for TS-2 with observed value
-#pdf("Pred2016_Damages_TS2_methodc.pdf")
+#2022 Simulated Damages for TS-2 with observed value
+pdf(file.path(filefigs,"Pred2022_Damages_TS2_methodc.pdf"))
 par(mar=c(3,3,0,0),mgp=c(1.8, 0.8, 0))#sets margins of plotting area
-hist(D1,freq=F,xlab='TS-2 Storm Damage',main='', breaks=c(0,1,2:31),axes=F,
-     ylim=c(0,0.32),cex.lab=1.25)
-axis(side=2,at=seq(0,0.32,0.05),pos=0,cex.axis=1.25)
+hist(D1,freq=F,xlab='1-2 Storm Damage',main='', breaks=c(0,1,2:31),axes=F,
+     ylim=c(0,0.25),cex.lab=1.25)
+axis(side=2,at=seq(0,0.25,0.05),pos=0,cex.axis=1.25)
 axis(side=1,at=seq(0,31,5),pos=-0.001,cex.axis=1.25)
-axis(side=3,at=seq(0,31,0.5),pos=0.31,lwd.ticks=0,labels=F)
-axis(side=4,at=seq(0,0.31,0.01),pos=31,lwd.ticks=0,labels=F)
+axis(side=3,at=seq(0,31,0.5),pos=0.25,lwd.ticks=0,labels=F)
+axis(side=4,at=seq(0,0.25,0.01),pos=31,lwd.ticks=0,labels=F)
 text(6,0.17,paste(round(mean(D1==0),2),'chance of\n $0 Damage'), cex = 1.2)
 text(25,0.2,paste(round(1-mean(D1==0),2),'chance of\n log(Damage)\n in this distribution'), cex = 1.2)
-segments(x0= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.1),y1= 0.11,col='red',lwd=3,lty=2)
-segments(x0= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$damage-0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$damage-0.1),y1= 0.11,col='red',lwd=3,lty=2)
-segments(x0=0,y0=0.30,x1=0,y1=0.31)
-#dev.off()
+segments(x0= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.1),y1= 0.16,col='red',lwd=3,lty=2)
+segments(x0= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$damage-0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$damage-0.1),y1= 0.16,col='red',lwd=3,lty=2)
+segments(x0=0,y0=0.24,x1=0,y1=0.25)
+dev.off()
 #################################################################
 #################################################################
 #Category 3-5
@@ -153,43 +154,43 @@ for(i in 1:posterior.sample.size){
   }
 }
 
-#2016 Simulated Frequency for 3-5 with observed value
-#pdf("Pred2016_Frequency_T35_methodc.pdf")
+#2022 Simulated Frequency for 3-5 with observed value
+pdf(file.path(filefigs,"Pred2022_Frequency_T35_methodc.pdf"))
 par(mar=c(4,4,0,0)+0.1,mgp=c(2.5, 0.8, 0))#sets margins of plotting area
-plot(table(N2)/sum(table(N2)),cex.lab=1.25, type = "h",ylab='Density',main='',xlab='3-5 Storm Frequency',xlim=c(0,15),axes=F)
+plot(table(N2)/sum(table(N2)),cex.lab=1.25, type = "h",ylab='Density',main='',xlab='3-5 Storm Frequency',xlim=c(0,15), ylim = c(0,0.19), axes=F)
 axis(side=2, cex.axis = 1.25)
 axis(side=1,at=seq(0,15,5), cex.axis = 1.25)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Freq +0.1,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Freq +0.1,y1= 0.048,col='red',lwd=3,lty=2)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Freq-0.1,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Freq -0.1,y1= 0.048,col='red',lwd=3,lty=2)
-#dev.off()
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Freq +0.1,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Freq +0.1,y1= 0.18,col='red',lwd=3,lty=2)
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Freq-0.1,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Freq -0.1,y1= 0.18,col='red',lwd=3,lty=2)
+dev.off()
 
-#2016 Simulated Landfall for 3-5 with observed value
-#pdf("Pred2016_Landfall_T35_methodc.pdf")
+#2022 Simulated Landfall for 3-5 with observed value
+pdf(file.path(filefigs,"Pred2022_Landfall_T35_methodc.pdf"))
 par(mar=c(4,4,0,0)+0.1,mgp=c(2.5, 0.8, 0))#sets margins of plotting area
 plot(table(L2)/sum(table(L2)),cex.lab=1.25, type = "h",ylab='Density',
-     xlab='3-5 Landfall Frequency',main='',axes=F,xlim=c(0,10))
+     xlab='3-5 Landfall Frequency',main='',axes=F,xlim=c(0,10), ylim = c(0,0.32))
 axis(side=2, cex.axis = 1.25)
 axis(side=1,at=seq(0,10,2), cex.axis = 1.25)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Landfall +0.1,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Landfall +0.1,y1= 0.32,col='red',lwd=3,lty=2)
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Landfall -0.1,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$Landfall -0.1,y1= 0.32,col='red',lwd=3,lty=2)
-#dev.off()
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Landfall +0.1,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Landfall +0.1,y1= 0.296,col='red',lwd=3,lty=2)
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Landfall -0.1,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$Landfall -0.1,y1= 0.296,col='red',lwd=3,lty=2)
+dev.off()
 
-#2016 Simulated Damages for 3-5 with observed value
-#pdf("Pred2016_Damages_T35_methodc.pdf")
+#2022 Simulated Damages for 3-5 with observed value
+pdf(file.path(filefigs,"Pred2022_Damages_T35_methodc.pdf"))
 par(mar=c(3,3,0,0),mgp=c(1.8, 0.8, 0))#sets margins of plotting area
-hist(D2,freq=F,xlab='3-5 Storm Damage',main='',ylim=c(0,0.6), axes = F, breaks=c(0,1,2:35),cex.lab=1.2)
+hist(D2,freq=F,xlab='3-5 Storm Damage',main='',ylim=c(0,0.35), axes = F, breaks=c(0,1,2:35),cex.lab=1.2)
 axis(side=2,pos=0)
 axis(side=1,pos=0,cex.axis=1.2)
-axis(side=3,at=seq(0,35,1),pos=0.6,lwd.ticks=0,labels=F)
-axis(side=4,at=seq(0,0.6,0.01),pos=35,lwd.ticks=0,labels=F)
+axis(side=3,at=seq(0,35,1),pos=0.35,lwd.ticks=0,labels=F)
+axis(side=4,at=seq(0,0.35,0.01),pos=35,lwd.ticks=0,labels=F)
 text(8,0.3,paste(round(mean(D2==0),2),'chance of\n $0 Damage'),cex=1.2)
 text(28,0.28,paste(round(1-mean(D2==0),2),'chance of\n log(Damage)\n in this distribution'),cex=1.2)
-segments(x0= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$damage+0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$damage+0.1),y1= 0.0455,col='red',lwd=3,lty=1)
-segments(x0= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$damage-0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='3-5',]$damage-0.1),y1= 0.0455,col='red',lwd=3,lty=1)
+segments(x0= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$damage+0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$damage+0.1),y1= 0.07,col='red',lwd=3,lty=1)
+segments(x0= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$damage-0.1),y0=0, x1= log(testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='3-5',]$damage-0.1),y1= 0.07,col='red',lwd=3,lty=1)
 #segments(x0=0,y0=-0.01,x1=0,y1=0)
 #segments(x0=35,y0=-0.01,x1=36,y1=-0.01)
 #segments(x0=0,y0=0.30,x1=0,y1=0.32)
-#dev.off()
+dev.off()
 
 par(mar=c(3,3,-0.1,-0.1)+0.1, mgp =c(2,1,0))#sets margins of plotting area
 hist(D1,freq=F,xlab='TS-2 Storm Damage',main='', breaks=c(0,1,2:31),axes=F,
@@ -200,7 +201,7 @@ axis(side=3,at=seq(0,31,1),pos=0.26,lwd.ticks=0,labels=F)
 axis(side=4,at=seq(-0.01,0.26,0.01),pos=31,lwd.ticks=0,labels=F)
 text(6,0.12,paste(round(mean(D1==0),2),'chance of\n $0 Damage'))
 text(26,0.115,paste(round(1-mean(D1==0),2),'chance of\n log(Damage)\n in this distribution'))
-segments(x0= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.6,y0=0, x1= testsettruth[testsettruth$Year== 2016 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.6,y1= 0.25,col='red',lwd=3,lty=2)
+segments(x0= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.6,y0=0, x1= testsettruth[testsettruth$Year== 2022 & testsettruth$Cat_HURDAT=='TS-2',]$damage+0.6,y1= 0.25,col='red',lwd=3,lty=2)
 segments(x0=0,y0=-0.01,x1=0,y1=0)
 segments(x0=30,y0=-0.01,x1=31,y1=-0.01)
 segments(x0=0,y0=0.25,x1=0,y1=0.26)
@@ -209,22 +210,22 @@ segments(x0=0,y0=0.25,x1=0,y1=0.26)
 ## TS2
 mean_vec_TS2 <- c(mean(N1),mean(L1),mean(D1))
 cov_NLD_TS2 <- cov(cbind(N1,L1,D1))
-mahal_dist_TS2 <- mahalanobis(x=Annual_Data[Annual_Data$Year<2016,3:5],center= mean_vec_TS2, 
+mahal_dist_TS2 <- mahalanobis(x=Annual_Data[Annual_Data$Year<2022,3:5],center= mean_vec_TS2, 
                               cov= cov_NLD_TS2)
 depth_TS2 <- 1/(1+mahal_dist_TS2)
-mahal_dist_2016_TS2 <- mahalanobis(x=testsettruth[testsettruth$Year==2016&testsettruth$Cat_HURDAT=="TS-2",3:5],center= mean_vec_TS2, 
+mahal_dist_2022_TS2 <- mahalanobis(x=testsettruth[testsettruth$Year==2022&testsettruth$Cat_HURDAT=="TS-2",3:5],center= mean_vec_TS2, 
                                    cov= cov_NLD_TS2)
-depth_2016_TS2 <- 1/(1+mahal_dist_2016_TS2)
-pval_depth_2016_TS2 <- sum(depth_TS2 < depth_2016_TS2)/length(depth_TS2)
+depth_2022_TS2 <- 1/(1+mahal_dist_2022_TS2)
+pval_depth_2022_TS2 <- sum(depth_TS2 < depth_2022_TS2)/length(depth_TS2)
 
 ## T35
 mean_vec_T35 <- c(mean(N2),mean(L2),mean(D2))
 cov_NLD_T35 <- cov(cbind(N2,L2,D2))
-mahal_dist_T35 <- mahalanobis(x=Annual_Data[Annual_Data$Year<2016,3:5],
+mahal_dist_T35 <- mahalanobis(x=Annual_Data[Annual_Data$Year<2022,3:5],
                               center= mean_vec_T35, cov= cov_NLD_T35)
 depth_T35 <- 1/(1+mahal_dist_T35)
-mahal_dist_2016_T35 <- mahalanobis(x=testsettruth[testsettruth$Year==2016&testsettruth$Cat_HURDAT=="3-5",3:5],center= mean_vec_T35, 
+mahal_dist_2022_T35 <- mahalanobis(x=testsettruth[testsettruth$Year==2022&testsettruth$Cat_HURDAT=="3-5",3:5],center= mean_vec_T35, 
                                    cov= cov_NLD_T35)
-depth_2016_T35 <- 1/(1+mahal_dist_2016_T35)
-pval_depth_2016_T35 <- sum(depth_T35 < depth_2016_T35)/length(depth_T35)
+depth_2022_T35 <- 1/(1+mahal_dist_2022_T35)
+pval_depth_2022_T35 <- sum(depth_T35 < depth_2022_T35)/length(depth_T35)
 

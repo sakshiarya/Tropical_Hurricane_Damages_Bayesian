@@ -30,35 +30,35 @@ library(coda)
 library(pscl)
 
 #Run all data creation and hyperparameter code
-filep<-'/Users/sakshi/Documents/School/Research/Lindsey_Dissertation2021/Chapter 2 - Bayesian Damage/Posterior Prediction/Predicting 2016/'
+filep<-'/Volumes/GoogleDrive-116944872060578867313/My\ Drive/Research/2022/Ansu/BayesStorm/Tropical_Hurricane_Damages_Bayesian/2024\ Redo\ Seasonal/Posterior\ Prediction/2020/MCMC'
 #source(paste(filep,'0_Data_Processing.r',sep=''))
 #source(paste(filep,'1a_Hyperpar_Beta_2010.r',sep=''))
 #source(paste(filep,'1b_Hyperpar_Theta_2010.r',sep=''))
 #source(paste(filep,'1c_Hyperpar_Mu_Sigma_2010.r',sep=''))
 #source(paste(filep,'2_Models_2010.r',sep=''))
 
-filedata<-'/Users/sakshi/Documents/School/Research/Lindsey_Dissertation2021/Chapter 2 - Bayesian Damage/Data Sets/'
-file_simulated_data <- '/Users/sakshi/Documents/School/Research/Lindsey_Dissertation2021/Chapter 2 - Bayesian Damage/Posterior Prediction/Predicting 2016/Datasets/'
 #Annualized data
-Annual_Data<- read.csv(file.path(filedata,'Derived Data Sets 2021/Categorized_Annual_1960_2019.csv'))
-testsettruth<-Annual_Data[Annual_Data$Year>=2016,]
+Annual_Data<- read.csv(file.path(filedata,'Categorized_Annual_1960_2022.csv'))
+testsettruth<-Annual_Data[Annual_Data$Year>=2020,]
 
 #Annualized Covariates (May/June Averages)
-Annual_Cov1 <- read.csv(file.path(filedata,'Derived Data Sets 2021/Annual_Covariates_1960_2019.csv'))
-Annual_Cov <- Annual_Cov1[Annual_Cov1$Year>=2016,]
+Annual_Cov <- read.csv(file.path(filedata,'Annual_Covariates_1960_2022.csv'))
+Annual_Cov <- Annual_Cov[Annual_Cov$Year>=2020,]
 
-#Observed covariate data for 2016
-testset<- as.numeric(Annual_Cov[Annual_Cov$Year == 2016,4:9])
+#Observed Data from 2011 forward
+testset<- as.numeric(Annual_Cov[Annual_Cov$Year == 2020,4:9])
 
-#Loading in the MCMC Chains
-load(paste(filep,'MCMC Chains/clones.MCMC.final.FB.all.2015.rda',sep=''))
-load(paste(filep,'MCMC Chains/jags.MCMC.final.FB.all.2015.rda',sep=''))
+##Loading in the MCMC Chains
+load(file.path(filep,'clones.MCMC.final.FB.all.2019.rda'))
+load(file.path(filep,'jags.MCMC.final.FB.all.2019.rda'))
 
-jags.2015.posterior <- as.mcmc(x= jags.MCMC.final.FB.all.2015)
+jags.2019.posterior <- as.mcmc(x= jags.MCMC.final.FB.all.2019)
 
 #Saving the hierarchical estimates (means of the posterior)
-pars2dclone<-summary(clones.MCMC.final.FB.all.2015)[[1]][,1]
-pars2jags<-summary(jags.2015.posterior)$statistics[c(1:12,14:20),1]
+pars2dclone<-summary(clones.MCMC.final.FB.all.2019)[[1]][,1]
+pars2jags<-summary(jags.2019.posterior)$statistics[c(1:14,16:20),1]
+
+
 
 #Assigning parameters for Group 1 (TS-2)
 parameters_group1dclone<-c(pars2dclone['Beta1[1]'],pars2dclone['Beta1[2]'],pars2dclone['Beta1[3]'],pars2dclone['Beta1[4]'],pars2dclone['Beta1[5]'],pars2dclone['Beta1[6]'], pars2dclone['r'], pars2dclone['Theta1'], pars2dclone['log_mu1'], pars2dclone['log_sigma21'])
@@ -69,8 +69,8 @@ parameters_group2dclone <-c(pars2dclone['Beta2[1]'], pars2dclone['Beta2[2]'],par
 parameters_group2jags <-c(pars2jags['Beta2[1]'], pars2jags['Beta2[2]'],pars2jags['Beta2[3]'],pars2jags['Beta2[4]'],pars2jags['Beta2[5]'],pars2jags['Beta2[6]'], pars2jags['Theta2'], pars2jags['log_mu2'], pars2jags['log_sigma22'])
 
 
-posterior.sample.size<-dim(jags.MCMC.final.FB.all.2015$BUGSoutput$sims.list$Beta1)[1]
-posterior.sample<-jags.MCMC.final.FB.all.2015$BUGSoutput$sims.list
+posterior.sample.size<-dim(jags.MCMC.final.FB.all.2019$BUGSoutput$sims.list$Beta1)[1]
+posterior.sample<-jags.MCMC.final.FB.all.2019$BUGSoutput$sims.list
 
 # No. of simulations per MCMC sample 
 num_simulations<-1000
