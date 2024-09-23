@@ -1,4 +1,4 @@
-### Function for Posterior in a hierarchical GEV model with each damages, windspeed and pressure as independent univariate GEV's.
+### Function for Posterior in a hierarchical GEV/trivariate/GEV with log-Normal damages model with  damages, windspeed and pressure as variables in the hierarchy.
 ## Input: # priorscale: hyperparameter choices,
           # data: to be inputted
           # covs: covariates common to each layer of hierarchy
