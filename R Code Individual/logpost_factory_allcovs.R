@@ -1,4 +1,10 @@
 ### Function for Posterior in a hierarchical GEV model with each damages, windspeed and pressure as independent univariate GEV's.
+## Input: # priorscale: hyperparameter choices,
+          # data: to be inputted
+          # covs: covariates common to each layer of hierarchy
+          # model: either "Hier_GEV" or "Tri_GEV" or "HalfNormalDamagesEVD" (depending on the model being used)
+## Output: # unnormalized posterior from the log-likelihood and priors
+
 logpost_factory <- function(priorscale, data, covs) function(par,  model){
   if(model == "Hier_GEV"){
   n <- nrow(data)  
